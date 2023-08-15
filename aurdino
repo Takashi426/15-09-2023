@@ -1,0 +1,112 @@
+// #include <SPI.h>
+// #include <mcp2515.h>
+// MCP2515 mcp2515(10);
+
+// struct can_frame canMsg1;
+
+// void setup() {
+//   while (!Serial);
+//   Serial.begin(115200);
+//   mcp2515.reset();
+//   mcp2515.setBitrate(CAN_250KBPS, MCP_8MHZ);
+//   mcp2515.setNormalMode();
+//   Serial.println("Write to CAN");
+// }
+
+// void loop() {
+//   char canid1[4];
+
+//   if (Serial.available() > 0) {
+//     String myString = Serial.readStringUntil('\n'); // Read until a newline character is encountered
+//     Serial.println(myString);
+
+//     String s1 = myString.substring(0, 2);
+//     int can_id_int = s1.toInt();  // Convert the substring to an integer
+//     canMsg1.can_id = can_id_int;
+
+//    // Serial.println(canMsg1.can_id);
+
+//     String l1 = myString.substring(2, 10);
+//     l1.getBytes(canMsg1.data, 10);
+//     int dataLength_1 = l1.length();
+//     canMsg1.can_dlc = dataLength_1;
+
+//     Serial.println("data length_1");
+//     Serial.println(canMsg1.can_dlc);
+//     Serial.println("can id_1");
+//     Serial.println(canMsg1.can_id);
+    
+//     if (mcp2515.sendMessage(&canMsg1) == MCP2515::ERROR_OK) {
+//       Serial.println("Messages sent to MCP2515");
+//     } else {
+//       Serial.println("Failed to send message to MCP2515");
+//     }
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+#include <SPI.h>//includiing spi libreary for can module
+#include <mcp2515.h>// including can libreary
+MCP2515 mcp2515(10);//chip select 
+
+uint8_t receiveBuffer[10];
+uint8_t transmitBuffer[10];
+uint8_t numberOfReceivedBytes;
+
+struct can_frame canMsg1; // defing the structure variable name message in a structure 
+
+
+
+void setup() {
+
+
+  while (!Serial);
+  Serial.begin(115200);
+  mcp2515.reset();
+ mcp2515.setBitrate(CAN_250KBPS, MCP_8MHZ);
+  mcp2515.setNormalMode();
+  Serial.println("Write to CAN");
+
+}
+
+void loop() 
+{
+  
+  char canid1[4];
+ 
+
+  
+  
+
+       if(Serial.available() > 0)
+    {
+      numberOfReceivedBytes = Serial.readBytes(receiveBuffer, 10);
+      Serial.println(numberOfReceivedBytes);
+      if (numberOfReceivedBytes == 10)
+      {
+         canMsg1.can_id  = receiveBuffer[0];
+         Serial.println(" canMsg1.can_id ");
+         Serial.println(canMsg1.can_id );
+
+        canMsg1.can_dlc = receiveBuffer[1];
+        for (uint8_t dataIndex = 0; dataIndex < 8; dataIndex++)
+        {
+          canMsg1.data[dataIndex] = receiveBuffer[2+dataIndex];
+        }
+        mcp2515.sendMessage(&canMsg1);
+        Serial.println("Messages sent_1 to 1st mcp2515");
+      }
+    }
+}
+
+
+     
