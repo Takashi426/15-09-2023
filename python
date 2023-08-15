@@ -1,0 +1,29 @@
+
+
+import serial
+import time
+
+def sendToCOM():
+    try:
+        ser = serial.Serial('COM10', 115200)  # Change COM port and baud rate as per your requirement
+
+        while True:
+            data_to_send = bytes([0x5, 0x8, 2, 5, 2, 12, 4, 0, 0, 0])
+
+            print("Sending data:", data_to_send)
+            time.sleep(1)
+            ser.write(data_to_send)
+            time.sleep(1)
+            response = ser.readline().decode()
+            print("Received response:", response)
+
+            time.sleep(1)  # Wait for 1 second before sending the next data
+
+    except Exception as e:
+        print(e)
+    finally:
+        ser.close()
+
+if __name__ == '__main__':
+    sendToCOM()
+
