@@ -1,0 +1,63 @@
+
+#include <SPI.h>
+#include <mcp2515_twoModules.h>
+
+MCP2515 mcp2515Receiver(10); // Chip select for receiver module
+MCP2515 mcp2515Sender(10);   // Chip select for sender module
+
+uint8_t receiveBuffer[10];
+uint8_t transmitBuffer[10];
+uint8_t numberOfReceivedBytes;
+
+struct can_frame canMsg;
+struct can_frame canMsg1;
+
+void setup() {
+  while (!Serial);
+  Serial.begin(115200);
+
+  mcp2515Receiver.reset();
+  mcp2515Receiver.setBitrate(CAN_250KBPS, MCP_8MHZ);
+  mcp2515Receiver.setNormalMode();
+/*
+  mcp2515Sender.reset();
+  mcp2515Sender.setBitrate(CAN_250KBPS, MCP_8MHZ);
+  mcp2515Sender.setNormalMode();*/
+
+  //Serial.println("------- CAN Read and Write ----------");
+}
+
+void loop() {
+   char canid1[4];
+ 
+  // Receiver code
+  if (mcp2515Receiver.readMessage(&canMsg) == MCP2515::ERROR_OK) {
+   // Serial.print("Receiver: ");
+    Serial.print(canMsg.can_id, HEX); // Print ID
+    Serial.print(" ");
+    Serial.print(canMsg.can_dlc, HEX); // Print DLC
+    Serial.print(" ");
+    
+    for (int i = 0; i < canMsg.can_dlc; i++)  { // Print the data
+      Serial.print(canMsg.data[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.println();
+  }
+
+  // Sender code
+  if (Serial.available() > 0) {
+    numberOfReceivedBytes = Serial.readBytes(receiveBuffer, 10);
+    if (numberOfReceivedBytes == 10) {
+      canMsg1.can_id = receiveBuffer[0];
+      canMsg1.can_dlc = receiveBuffer[1];
+      for (uint8_t dataIndex = 0; dataIndex < 8; dataIndex++) {
+        canMsg1.data[dataIndex] = receiveBuffer[2 + dataIndex];
+      }
+      mcp2515Sender.sendMessage(&canMsg1);
+     // Serial.println("Sender: Message sent to MCP2515");
+    }
+  }
+}
+
+
