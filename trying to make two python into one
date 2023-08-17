@@ -102,6 +102,68 @@ if __name__ == '__main__':
 
 
 
+//just updated here to print hand shake completed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import serial
+import time
+
+received_data_array = []  # Initialize an array to store received data
+
+def sendToCOM():
+    try:
+        ser_send = serial.Serial('COM10', 115200)  # Change COM port and baud rate as per your requirement
+
+        while True:
+            data_to_send = bytes([0x5, 0x8, 2, 5, 2, 12, 4, 0, 0, 0])
+
+            print("Sending data:", data_to_send)
+            time.sleep(1)
+            ser_send.write(data_to_send)
+            time.sleep(1)
+
+    except Exception as e:
+        print(e)
+    finally:
+        ser_send.close()
+
+def receiveFromCOM():
+    try:
+        ser_receive = serial.Serial('COM10', 115200)  # Change COM port and baud rate as per your requirement
+
+        while True:
+            if ser_receive.in_waiting > 0:
+                received_data = ser_receive.read(ser_receive.in_waiting)
+                print("Received data:", received_data)
+                received_data_array.append(received_data)  # Store received data in the array
+
+                if received_data[0] == 123:
+                    print("Handshake completed")
+
+            time.sleep(1)  # Poll for received data every 1 second
+
+    except Exception as e:
+        print(e)
+    finally:
+        ser_receive.close()
+
+if __name__ == '__main__':
+    sendToCOM()
+    receiveFromCOM()
 
 
 
